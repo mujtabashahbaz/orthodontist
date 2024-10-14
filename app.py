@@ -148,14 +148,13 @@ if patient_name:
         """
 
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.completions.create(
                 model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an experienced orthodontist providing detailed treatment plans."},
-                    {"role": "user", "content": prompt}
-                ]
+                prompt=prompt,
+                temperature=0.7,
+                max_tokens=1500,
             )
-            treatment_plan = response.choices[0].message.content
+            treatment_plan = response['choices'][0]['text']
             st.subheader("Generated Treatment Plan")
             st.markdown(treatment_plan)
 
