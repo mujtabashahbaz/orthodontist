@@ -1,9 +1,9 @@
 import streamlit as st
-import openai
 import os
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
+from openai import OpenAI
 
 # Check if required libraries are installed
 try:
@@ -22,7 +22,8 @@ if api_key is None:
         st.warning("Please enter your OpenAI API key to proceed.")
         st.stop()
 
-openai.api_key = api_key
+# Create OpenAI client
+client = OpenAI(api_key=api_key)
 
 # Initialize session state
 if 'patients' not in st.session_state:
@@ -148,14 +149,16 @@ if patient_name:
         """
 
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+            chat_completion = client.chat.completions.create(
                 messages=[
-                    {"role": "system", "content": "You are an experienced orthodontist providing detailed treatment plans."},
-                    {"role": "user", "content": prompt}
-                ]
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+                model="gpt-3.5-turbo",
             )
-            treatment_plan = response['choices'][0]['message']['content']
+            treatment_plan = chat_completion['choices'][0]['message']['content']
             st.subheader("Generated Treatment Plan")
             st.markdown(treatment_plan)
 
