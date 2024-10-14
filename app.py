@@ -29,7 +29,7 @@ if 'patients' not in st.session_state:
     st.session_state.patients = {}
 
 # Main app layout
-st.title("Advanced Orthodontic Treatment Planner")
+st.title("Professional Orthodontic Treatment Planner")
 
 # Sidebar for patient selection/creation
 st.sidebar.header("Patient Management")
@@ -41,7 +41,7 @@ if patient_action == "Create New Patient":
         if new_patient_name and new_patient_name not in st.session_state.patients:
             st.session_state.patients[new_patient_name] = {
                 "info": {},
-                "treatment_history": []
+                "treatment_plans": []
             }
             st.success(f"Patient {new_patient_name} created successfully!")
         elif new_patient_name in st.session_state.patients:
@@ -59,74 +59,127 @@ if patient_name:
     st.subheader("Patient Information")
     col1, col2 = st.columns(2)
     with col1:
-        patient['info']['age'] = st.number_input("Age", min_value=0, max_value=120, step=1, value=patient['info'].get('age', 0))
-        patient['info']['gender'] = st.selectbox("Gender", ["", "Male", "Female", "Other"], index=["", "Male", "Female", "Other"].index(patient['info'].get('gender', "")))
-        patient['info']['main_concern'] = st.text_input("Main Concern", value=patient['info'].get('main_concern', ""))
+        patient['info']['name'] = st.text_input("Patient Name", value=patient['info'].get('name', patient_name))
+        patient['info']['dob'] = st.date_input("Date of Birth", value=patient['info'].get('dob'))
+        patient['info']['consultation_date'] = st.date_input("Date of Consultation", value=datetime.now())
+        patient['info']['orthodontist'] = st.text_input("Orthodontist", value=patient['info'].get('orthodontist', "Dr. "))
     with col2:
-        patient['info']['bite_type'] = st.selectbox("Bite Type", ["", "Normal", "Overbite", "Underbite", "Crossbite", "Open bite"], index=["", "Normal", "Overbite", "Underbite", "Crossbite", "Open bite"].index(patient['info'].get('bite_type', "")))
-        patient['info']['crowding'] = st.selectbox("Crowding", ["", "None", "Mild", "Moderate", "Severe"], index=["", "None", "Mild", "Moderate", "Severe"].index(patient['info'].get('crowding', "")))
-        patient['info']['treatment_history'] = st.text_area("Treatment History", value=patient['info'].get('treatment_history', ""))
+        patient['info']['patient_id'] = st.text_input("Patient ID", value=patient['info'].get('patient_id', ""))
+        patient['info']['chief_complaint'] = st.text_area("Chief Complaint", value=patient['info'].get('chief_complaint', ""))
+
+    # Clinical Examination
+    st.subheader("Clinical Examination")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Extraoral Examination")
+        patient['info']['facial_symmetry'] = st.selectbox("Facial symmetry", ["Symmetric", "Asymmetric"], index=["Symmetric", "Asymmetric"].index(patient['info'].get('facial_symmetry', "Symmetric")))
+        patient['info']['lip_competency'] = st.selectbox("Lip competency", ["Competent", "Incompetent"], index=["Competent", "Incompetent"].index(patient['info'].get('lip_competency', "Competent")))
+        patient['info']['smile_line'] = st.selectbox("Smile line", ["High", "Low", "Normal"], index=["High", "Low", "Normal"].index(patient['info'].get('smile_line', "Normal")))
+        patient['info']['chin_position'] = st.selectbox("Chin position", ["Protrusive", "Retrusive", "Normal"], index=["Protrusive", "Retrusive", "Normal"].index(patient['info'].get('chin_position', "Normal")))
+    with col2:
+        st.write("Intraoral Examination")
+        patient['info']['arch_form'] = st.selectbox("Arch form", ["U-shaped", "V-shaped"], index=["U-shaped", "V-shaped"].index(patient['info'].get('arch_form', "U-shaped")))
+        patient['info']['crowding'] = st.selectbox("Crowding", ["Mild", "Moderate", "Severe"], index=["Mild", "Moderate", "Severe"].index(patient['info'].get('crowding', "Mild")))
+        patient['info']['spacing'] = st.selectbox("Spacing", ["Present", "Absent"], index=["Present", "Absent"].index(patient['info'].get('spacing', "Absent")))
+        patient['info']['crossbite'] = st.selectbox("Crossbite", ["Present", "Absent"], index=["Present", "Absent"].index(patient['info'].get('crossbite', "Absent")))
+        patient['info']['overbite'] = st.selectbox("Overbite", ["Normal", "Deep", "Open"], index=["Normal", "Deep", "Open"].index(patient['info'].get('overbite', "Normal")))
+        patient['info']['overjet'] = st.selectbox("Overjet", ["Increased", "Decreased", "Normal"], index=["Increased", "Decreased", "Normal"].index(patient['info'].get('overjet', "Normal")))
+        patient['info']['occlusion_class'] = st.selectbox("Occlusion Class", ["Class I", "Class II", "Class III"], index=["Class I", "Class II", "Class III"].index(patient['info'].get('occlusion_class', "Class I")))
+
+    # Radiographic Analysis
+    st.subheader("Radiographic Analysis")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("Cephalometric Analysis")
+        patient['info']['sna'] = st.number_input("SNA (degrees)", value=patient['info'].get('sna', 82.0), format="%.1f")
+        patient['info']['snb'] = st.number_input("SNB (degrees)", value=patient['info'].get('snb', 80.0), format="%.1f")
+        patient['info']['anb'] = st.number_input("ANB (degrees)", value=patient['info'].get('anb', 2.0), format="%.1f")
+        patient['info']['fma'] = st.number_input("FMA (degrees)", value=patient['info'].get('fma', 25.0), format="%.1f")
+    with col2:
+        st.write("Panoramic X-ray")
+        patient['info']['impacted_teeth'] = st.selectbox("Impacted teeth", ["Present", "Absent"], index=["Present", "Absent"].index(patient['info'].get('impacted_teeth', "Absent")))
+        patient['info']['root_resorption'] = st.selectbox("Root resorption", ["Present", "Absent"], index=["Present", "Absent"].index(patient['info'].get('root_resorption', "Absent")))
+        patient['info']['eruption_pattern'] = st.selectbox("Eruption pattern", ["Normal", "Delayed"], index=["Normal", "Delayed"].index(patient['info'].get('eruption_pattern', "Normal")))
 
     # Generate Treatment Plan
     if st.button("Generate Treatment Plan"):
-        if not all([patient['info'].get(field) for field in ['age', 'gender', 'main_concern', 'bite_type', 'crowding']]):
-            st.error("Please fill in all required fields.")
-        else:
-            prompt = f"""
-            Patient Information:
-            - Age: {patient['info']['age']}
-            - Gender: {patient['info']['gender']}
-            - Main Concern: {patient['info']['main_concern']}
-            - Bite Type: {patient['info']['bite_type']}
-            - Crowding: {patient['info']['crowding']}
-            - Treatment History: {patient['info']['treatment_history']}
+        prompt = f"""
+        Based on the following patient information, generate a detailed orthodontic treatment plan:
 
-            Based on the above information, provide a detailed orthodontic treatment plan.
-            Include the following:
-            1. Specific recommendations for appliances
-            2. Estimated treatment duration
-            3. Phases of treatment (if applicable)
-            4. Potential challenges and how to address them
-            5. Post-treatment retention strategy
-            6. Estimated cost range for the treatment (in USD)
-            7. Any lifestyle or dietary recommendations during treatment
+        Patient Name: {patient['info']['name']}
+        Date of Birth: {patient['info']['dob']}
+        Date of Consultation: {patient['info']['consultation_date']}
+        Orthodontist: {patient['info']['orthodontist']}
+        Patient ID: {patient['info']['patient_id']}
 
-            Format the response in markdown for better readability.
-            """
+        Chief Complaint: {patient['info']['chief_complaint']}
 
-            try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "system", "content": "You are an experienced orthodontist providing detailed treatment plans."},
-                        {"role": "user", "content": prompt}
-                    ]
-                )
-                treatment_plan = response.choices[0].message.content
-                st.subheader("Generated Treatment Plan")
-                st.markdown(treatment_plan)
+        Clinical Examination:
+        - Facial symmetry: {patient['info']['facial_symmetry']}
+        - Lip competency: {patient['info']['lip_competency']}
+        - Smile line: {patient['info']['smile_line']}
+        - Chin position: {patient['info']['chin_position']}
+        - Arch form: {patient['info']['arch_form']}
+        - Crowding: {patient['info']['crowding']}
+        - Spacing: {patient['info']['spacing']}
+        - Crossbite: {patient['info']['crossbite']}
+        - Overbite: {patient['info']['overbite']}
+        - Overjet: {patient['info']['overjet']}
+        - Occlusion Class: {patient['info']['occlusion_class']}
 
-                # Add to treatment history
-                patient['treatment_history'].append({
-                    "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "plan": treatment_plan
-                })
-                st.success("Treatment plan added to patient history.")
-            except Exception as e:
-                st.error(f"An error occurred while generating the treatment plan: {str(e)}")
-                st.info("Please check your OpenAI API key and internet connection.")
+        Radiographic Analysis:
+        - SNA: {patient['info']['sna']}
+        - SNB: {patient['info']['snb']}
+        - ANB: {patient['info']['anb']}
+        - FMA: {patient['info']['fma']}
+        - Impacted teeth: {patient['info']['impacted_teeth']}
+        - Root resorption: {patient['info']['root_resorption']}
+        - Eruption pattern: {patient['info']['eruption_pattern']}
+
+        Please provide a comprehensive treatment plan including:
+        1. Diagnosis
+        2. Treatment Objectives
+        3. Detailed Treatment Plan (including appliance therapy, archwire sequence, and any adjunctive therapies)
+        4. Retention Phase
+        5. Estimated Treatment Duration
+        6. Potential Risks and Complications
+
+        Format the response in markdown for better readability.
+        """
+
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are an experienced orthodontist providing detailed treatment plans."},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            treatment_plan = response.choices[0].message.content
+            st.subheader("Generated Treatment Plan")
+            st.markdown(treatment_plan)
+
+            # Add to treatment plans
+            patient['treatment_plans'].append({
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "plan": treatment_plan
+            })
+            st.success("Treatment plan added to patient history.")
+        except Exception as e:
+            st.error(f"An error occurred while generating the treatment plan: {str(e)}")
+            st.info("Please check your OpenAI API key and internet connection.")
 
     # Display Treatment History
-    if patient['treatment_history']:
+    if patient['treatment_plans']:
         st.subheader("Treatment History")
-        for i, entry in enumerate(patient['treatment_history']):
+        for i, entry in enumerate(patient['treatment_plans']):
             with st.expander(f"Treatment Plan {i+1} - {entry['date']}"):
                 st.markdown(entry['plan'])
 
     # Visual Treatment Timeline
-    if patient['treatment_history']:
+    if patient['treatment_plans']:
         st.subheader("Treatment Timeline")
-        df = pd.DataFrame(patient['treatment_history'])
+        df = pd.DataFrame(patient['treatment_plans'])
         df['date'] = pd.to_datetime(df['date'])
         df = df.sort_values('date')
 
@@ -140,6 +193,7 @@ if patient_name:
 # Add a note about the app's purpose
 st.markdown("""
     ---
-    **Note**: This app uses AI to generate treatment plan suggestions based on input data. 
+    **Note**: This app uses AI to generate orthodontic treatment plan suggestions based on input data. 
     It should be used as a tool to assist professional judgment, not as a replacement for expert medical advice.
+    Always consult with a qualified orthodontist for actual patient care.
     """)
