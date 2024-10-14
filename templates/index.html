@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orthodontic Treatment Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Orthodontic Treatment Planner</h1>
+        <form id="patientForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="age">
+                    Age
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="age" type="number" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="gender">
+                    Gender
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="gender" required>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="mainConcern">
+                    Main Concern
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="mainConcern" type="text" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="biteType">
+                    Bite Type
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="biteType" required>
+                    <option value="">Select bite type</option>
+                    <option value="normal">Normal</option>
+                    <option value="overbite">Overbite</option>
+                    <option value="underbite">Underbite</option>
+                    <option value="crossbite">Crossbite</option>
+                    <option value="openbite">Open bite</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="crowding">
+                    Crowding
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="crowding" required>
+                    <option value="">Select crowding level</option>
+                    <option value="none">None</option>
+                    <option value="mild">Mild</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="severe">Severe</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="treatmentHistory">
+                    Treatment History
+                </label>
+                <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="treatmentHistory" rows="3"></textarea>
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                    Get Treatment Plan
+                </button>
+            </div>
+        </form>
+        <div id="treatmentPlan" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 hidden">
+            <h2 class="text-2xl font-bold mb-4">Treatment Plan</h2>
+            <pre id="treatmentPlanText" class="whitespace-pre-wrap"></pre>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                mainConcern: document.getElementById('mainConcern').value,
+                biteType: document.getElementById('biteType').value,
+                crowding: document.getElementById('crowding').value,
+                treatmentHistory: document.getElementById('treatmentHistory').value
+            };
+
+            try {
+                const response = await axios.post('/get_treatment_plan', formData);
+                document.getElementById('treatmentPlanText').textContent = response.data.treatment_plan;
+                document.getElementById('treatmentPlan').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while getting the treatment plan. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
